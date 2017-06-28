@@ -1,6 +1,6 @@
 ## bilibili ASS Danmaku Downloader ##
 
-[bilibili ASS Danmaku Downloader](http://tiansh.github.io/us-danmaku/bilibili/)
+[bilibili ASS Danmaku Downloader](https://github.com/gameclamp/us-danmaku/raw/master/bilibili/bilibili_ASS_Danmaku_Downloader.user.js)
 
 下载bilibili弹幕。
 
