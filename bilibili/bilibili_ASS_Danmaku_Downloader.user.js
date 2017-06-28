@@ -1,16 +1,18 @@
-﻿// ==UserScript==
+// ==UserScript==
 // @name        bilibili ASS Danmaku Downloader
-// @namespace   https://github.com/tiansh
+// @namespace   https://github.com/gameclamp
 // @description 以 ASS 格式下载 bilibili 的弹幕
-// @include     http://www.bilibili.com/video/av*
-// @include     http://bangumi.bilibili.com/movie/*
-// @updateURL   https://tiansh.github.io/us-danmaku/bilibili/bilibili_ASS_Danmaku_Downloader.meta.js
-// @downloadURL https://tiansh.github.io/us-danmaku/bilibili/bilibili_ASS_Danmaku_Downloader.user.js
-// @version     1.11
+// @include     https://www.bilibili.com/video/av*
+// @include     https://bangumi.bilibili.com/movie/*
+// @include     https://bangumi.bilibili.com/anime/*
+// @updateURL   https://github.com/gameclamp/us-danmaku/raw/master/bilibili/bilibili_ASS_Danmaku_Downloader.meta.js
+// @downloadURL https://github.com/gameclamp/us-danmaku/raw/master/bilibili/bilibili_ASS_Danmaku_Downloader.user.js
+// @version     1.12
 // @grant       GM_addStyle
 // @grant       GM_xmlhttpRequest
 // @run-at      document-start
 // @author      田生
+// @fixer       Gameclamp
 // @copyright   2014+, 田生
 // @license     Mozilla Public License 2.0; http://www.mozilla.org/MPL/2.0/
 // @license     CC Attribution-ShareAlike 4.0 International; http://creativecommons.org/licenses/by-sa/4.0/
@@ -24,8 +26,8 @@
 
 // 设置项
 var config = {
-  'playResX': 560,           // 屏幕分辨率宽（像素）
-  'playResY': 420,           // 屏幕分辨率高（像素）
+  'playResX': 1280,           // 屏幕分辨率宽（像素）
+  'playResY': 720,           // 屏幕分辨率高（像素）
   'fontlist': [              // 字形（会自动选择最前面一个可用的）
     'Microsoft YaHei UI',
     'Microsoft YaHei',
@@ -547,7 +549,7 @@ var parseXML = function (content) {
 // 获取当前cid
 var getCid = function (callback) {
   debug('get cid...');
-  var cid = null, src = null;
+  var cid = null||unsafeWindow.cid, src = null||unsafeWindow.episode_id;
   try {
     src = document.querySelector('#bofqi iframe, #moviebofqi iframe').src.replace(/^.*\?/, '');
     cid = Number(src.match(/cid=(\d+)/)[1]);
@@ -563,9 +565,10 @@ var getCid = function (callback) {
   if (cid) setTimeout(callback, 0, cid);
   else if (src) GM_xmlhttpRequest({
     'method': 'GET',
-    'url': 'http://interface.bilibili.com/player?' + src,
+    'url': 'https://bangumi.bilibili.com/web_api/episode/' + src + '.json',
+    'responseType': 'json',
     'onload': function (resp) {
-      try { cid = Number(resp.responseText.match(/<chatid>(\d+)<\/chatid>/)[1]); }
+      try { cid = Number(resp.response.result.currentEpisode.danmaku)}
       catch (e) { }
       setTimeout(callback, 0, cid || undefined);
     },
@@ -595,10 +598,10 @@ var mina = function (cid0) {
 
 // 显示出下载弹幕按钮
 var showButton = function (count) {
-  GM_addStyle('.arc-toolbar .block.fav { margin-right: 0 } .arc-toolbar .block { padding: 0 18px; }');
-  var favbar = document.querySelector('.arc-toolbar .block.fav');
+  //GM_addStyle('.arc-toolbar .block.fav { margin-right: 0 } .arc-toolbar .block { padding: 0 18px; }');
+  var favbar = document.querySelector('.v-title-info .icon_btn_order');
   var assdown = document.createElement('div');
-  assdown.innerHTML = '<div id="assdown" class="block ass"><span class="t ass_btn"><i style="display: block; width: 80px; height: 80px; background-position: 0px 0px; background-image: url(&quot;data:image/png;base64,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&quot;);" class="b-icon b-icon-a b-icon-anim-ass" title="弹幕下载"></i><div class="t-right"><span class="t-right-top">弹幕下载</span><span class="t-right-bottom">' + count + '</span></div></span></div>';
+  assdown.innerHTML = '<div id="assdown" class="block ass"><span class="t ass_btn"><i style="display: block; width: 28px; height: 28px; background-position: 0px 0px; background-image: url(&quot;data:image/png;base64,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&quot;);" class="b-icon b-icon-a b-icon-anim-ass" title="弹幕下载"></i><div class="t-right"><span class="t-right-top">弹幕下载</span><span class="t-right-bottom">' + count + '</span></div></span></div>';
   assdown = assdown.firstChild;
   favbar.parentNode.insertBefore(assdown, favbar.nextSibling);
   var timer = null, frame = 0;
@@ -617,7 +620,7 @@ var initButton = (function () {
   var done = false;
   return function () {
     debug('init button');
-    if (!document.querySelector('.arc-toolbar .block.fav')) return;
+    if (!document.querySelector('.v-title-info .icon_btn_order')) return;
     getCid(function (cid) {
       debug('cid = %o', cid);
       if (!cid || done) return; else done = true;
