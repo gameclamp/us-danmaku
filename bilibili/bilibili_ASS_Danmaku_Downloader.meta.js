@@ -7,7 +7,7 @@
 // @include     https://bangumi.bilibili.com/anime/*
 // @updateURL   https://github.com/gameclamp/us-danmaku/raw/master/bilibili/bilibili_ASS_Danmaku_Downloader.meta.js
 // @downloadURL https://github.com/gameclamp/us-danmaku/raw/master/bilibili/bilibili_ASS_Danmaku_Downloader.user.js
-// @version     1.12
+// @version     1.13
 // @grant       GM_addStyle
 // @grant       GM_xmlhttpRequest
 // @run-at      document-start
